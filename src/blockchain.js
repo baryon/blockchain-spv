@@ -47,8 +47,8 @@ class Blockchain extends EventEmitter {
     if (this.indexed) {
       // index blocks by hash
       this.index = new MapDeque()
-      for (let header of this.store) {
-        let hexHash = getHash(header).toString('hex')
+      for (const header of this.store) {
+        const hexHash = getHash(header).toString('hex')
         this.index.push(hexHash, header)
       }
     }
@@ -78,8 +78,8 @@ class Blockchain extends EventEmitter {
     }
 
     // get list of blocks which will be reorged (usually none)
-    let index = headers[0].height - this.store[0].height
-    let toRemove = this.store.slice(index)
+    const index = headers[0].height - this.store[0].height
+    const toRemove = this.store.slice(index)
 
     // make sure we this isn't a fake reorg (including headers which are already in the chain)
     if (toRemove.length > 0 && getHash(headers[0]).equals(getHash(toRemove[0]))) {
@@ -103,8 +103,8 @@ class Blockchain extends EventEmitter {
 
     // index headers by hash
     if (this.indexed) {
-      for (let header of headers) {
-        let hexHash = getHash(header).toString('hex')
+      for (const header of headers) {
+        const hexHash = getHash(header).toString('hex')
         this.index.push(hexHash, header)
         if (this.index.length > maxReorgDepth) {
           this.index.shift()
@@ -133,8 +133,8 @@ class Blockchain extends EventEmitter {
       extra = this.store
     }
 
-    let index = height - extra[0].height
-    let header = extra[index]
+    const index = height - extra[0].height
+    const header = extra[index]
     if (header == null) {
       throw Error('Header not found')
     }
@@ -145,7 +145,7 @@ class Blockchain extends EventEmitter {
     if (!this.indexed) {
       throw Error('Indexing disabled, try instantiating with `indexed: true`')
     }
-    let header = this.index.get(hash.toString('hex'))
+    const header = this.index.get(hash.toString('hex'))
     if (header == null) {
       throw Error('Header not found')
     }
@@ -157,8 +157,8 @@ class Blockchain extends EventEmitter {
   }
 
   verifyHeaders (headers) {
-    for (let header of headers) {
-      let prev = this.getByHeight(header.height - 1, headers)
+    for (const header of headers) {
+      const prev = this.getByHeight(header.height - 1, headers)
 
       if (header.height !== prev.height + 1) {
         throw Error('Expected height to be one higher than previous')
@@ -172,11 +172,11 @@ class Blockchain extends EventEmitter {
       // TODO: optimize by persisting arrays of sorted timestamps and sequential headers
       let prevEleven = []
       for (let i = 11; i > 0; i--) {
-        let height = Math.max(header.height - i, this.store[0].height)
+        const height = Math.max(header.height - i, this.store[0].height)
         prevEleven.push(this.getByHeight(height, headers))
       }
       prevEleven = prevEleven.map(({ timestamp }) => timestamp).sort()
-      let medianTimestamp = prevEleven[5]
+      const medianTimestamp = prevEleven[5]
       // we use !> instead of <= to ensure we fail on non-number timestamp values
       if (!(header.timestamp > medianTimestamp)) {
         throw Error('Timestamp is not greater than median of previous 11 timestamps')
@@ -191,14 +191,14 @@ class Blockchain extends EventEmitter {
       }
 
       // handle difficulty adjustments
-      let shouldRetarget = header.height % retargetInterval === 0
-      let prevTarget = expandTarget(prev.bits)
+      const shouldRetarget = header.height % retargetInterval === 0
+      const prevTarget = expandTarget(prev.bits)
       let expectedBits
       if (shouldRetarget && !this.noRetargeting) {
         // make sure the retarget happened correctly
-        let prevRetarget = this.getByHeight(header.height - retargetInterval, headers)
-        let timespan = prev.timestamp - prevRetarget.timestamp
-        let target = calculateTarget(timespan, prevTarget, this.maxTarget, this.maxTargetBn)
+        const prevRetarget = this.getByHeight(header.height - retargetInterval, headers)
+        const timespan = prev.timestamp - prevRetarget.timestamp
+        const target = calculateTarget(timespan, prevTarget, this.maxTarget, this.maxTargetBn)
         expectedBits = compressTarget(target)
       } else if (this.allowMinDifficultyBlocks && !this.noRetargeting) {
         // special rule for testnet,
@@ -228,8 +228,8 @@ class Blockchain extends EventEmitter {
       // check PoW
       // bitcoin protocol uses the hash in
       // little-endian (reversed)
-      let target = expandTarget(header.bits)
-      let hash = getHash(header).reverse()
+      const target = expandTarget(header.bits)
+      const hash = getHash(header).reverse()
       if (hash.compare(target) === 1) {
         throw Error('Hash is above target')
       }
@@ -248,7 +248,7 @@ function sha256 (data) {
 }
 
 function getHash (header) {
-  let bytes = types.header.encode(header)
+  const bytes = types.header.encode(header)
   return sha256(sha256(bytes))
 }
 
@@ -261,7 +261,7 @@ function calculateTarget (timespan, prevTarget, maxTarget, maxTargetBn) {
   timespan = Math.min(timespan, targetTimespan * 4)
 
   // target = prevTarget * timespan / targetTimespan
-  let targetBn = new BN(prevTarget.toString('hex'), 'hex')
+  const targetBn = new BN(prevTarget.toString('hex'), 'hex')
   targetBn.imuln(timespan)
   targetBn.idivn(targetTimespan)
 
@@ -273,6 +273,6 @@ function calculateTarget (timespan, prevTarget, maxTarget, maxTargetBn) {
   // convert target to Buffer
   let targetHex = targetBn.toString('hex')
   targetHex = targetHex.padStart(64, '0')
-  let target = Buffer.from(targetHex, 'hex')
+  const target = Buffer.from(targetHex, 'hex')
   return target
 }

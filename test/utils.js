@@ -8,14 +8,14 @@ const testMaxTarget = Buffer.from('7ffffffffffffffffffffffffffffffffffffffffffff
 const testMaxTargetBn = new BN(testMaxTarget.toString('hex'), 'hex')
 
 function isValidProofOfWork (header) {
-  let target = u.expandTarget(header.bits)
-  let hash = getHash(header).reverse()
+  const target = u.expandTarget(header.bits)
+  const hash = getHash(header).reverse()
   return hash.compare(target) !== 1
 }
 
 function createHeader (prev, nonce, bits, validProof = true, timeSpacing = 600) {
   let i = nonce || Math.floor(Math.random() * 10e6)
-  let height = prev ? (prev.height + 1) : 0
+  const height = prev ? (prev.height + 1) : 0
   let header
   do {
     header = {
@@ -43,16 +43,16 @@ const testGenesis = {
 
 function mine (chain, blocks, add = true, timeSpacing = 600) {
   let prev = chain.getByHeight(chain.height())
-  let headers = []
+  const headers = []
   for (let i = 0; i < blocks; i++) {
     let bits
     if ((prev.height + 1) % 2016 === 0) {
-      let timespan = timeSpacing * 2015
-      let prevTarget = u.expandTarget(prev.bits)
-      let target = calculateTarget(timespan, prevTarget, testMaxTarget, testMaxTargetBn)
+      const timespan = timeSpacing * 2015
+      const prevTarget = u.expandTarget(prev.bits)
+      const target = calculateTarget(timespan, prevTarget, testMaxTarget, testMaxTargetBn)
       bits = u.compressTarget(target)
     }
-    let header = createHeader(prev, null, bits, true, timeSpacing)
+    const header = createHeader(prev, null, bits, true, timeSpacing)
     headers.push(header)
     prev = header
   }

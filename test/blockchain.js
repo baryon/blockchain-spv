@@ -23,7 +23,7 @@ const bitcoinGenesisHash = '6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6
 test('create Blockchain instance', (t) => {
   t.test('with no args', (t) => {
     try {
-      let chain = new Blockchain()
+      const chain = new Blockchain()
       t.undefined(chain)
     } catch (err) {
       t.equal(err.message, 'Must specify starting header')
@@ -32,14 +32,14 @@ test('create Blockchain instance', (t) => {
   })
 
   t.test('with non-empty store', (t) => {
-    let store = [ bitcoinGenesis ]
-    let chain = new Blockchain({ store })
+    const store = [bitcoinGenesis]
+    const chain = new Blockchain({ store })
     t.deepEquals(chain.getByHeight(0), bitcoinGenesis)
     t.end()
   })
 
   t.test('with starting header', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis })
+    const chain = new Blockchain({ start: bitcoinGenesis })
     t.deepEquals(chain.getByHeight(0), bitcoinGenesis)
     t.end()
   })
@@ -49,7 +49,7 @@ test('create Blockchain instance', (t) => {
 
 test('getByHeight', (t) => {
   t.test('out of range', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis })
+    const chain = new Blockchain({ start: bitcoinGenesis })
     try {
       chain.getByHeight(1)
       t.fail()
@@ -66,7 +66,7 @@ test('getByHeight', (t) => {
   })
 
   t.test('in range', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
     t.deepEquals(chain.getByHeight(0), testGenesis)
     t.equals(chain.getByHeight(10).height, 10)
@@ -74,9 +74,9 @@ test('getByHeight', (t) => {
   })
 
   t.test('with extra', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let extra = mine(chain, 10, false)
+    const extra = mine(chain, 10, false)
     t.deepEquals(chain.getByHeight(0, extra), testGenesis)
     t.equals(chain.getByHeight(10, extra).height, 10)
     t.equals(chain.getByHeight(11, extra), extra[0])
@@ -85,9 +85,9 @@ test('getByHeight', (t) => {
   })
 
   t.test('with forked extra', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let extra = mine(chain, 10, false)
+    const extra = mine(chain, 10, false)
     mine(chain, 20)
     t.deepEquals(chain.getByHeight(0, extra), testGenesis)
     t.equals(chain.getByHeight(10, extra).height, 10)
@@ -109,7 +109,7 @@ test('getByHeight', (t) => {
 
 test('getByHash', (t) => {
   t.test('errors when not indexing', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis })
+    const chain = new Blockchain({ start: bitcoinGenesis })
     try {
       chain.getByHash(bitcoinGenesisHash)
       t.fail()
@@ -120,7 +120,7 @@ test('getByHash', (t) => {
   })
 
   t.test('with string', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
+    const chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
     t.deepEquals(
       chain.getByHash(bitcoinGenesisHash),
       bitcoinGenesis
@@ -129,7 +129,7 @@ test('getByHash', (t) => {
   })
 
   t.test('with Buffer', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
+    const chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
     t.deepEquals(
       chain.getByHash(Buffer.from(bitcoinGenesisHash, 'hex')),
       bitcoinGenesis
@@ -138,7 +138,7 @@ test('getByHash', (t) => {
   })
 
   t.test('for missing header', (t) => {
-    let chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
+    const chain = new Blockchain({ start: bitcoinGenesis, indexed: true })
     try {
       chain.getByHash('1234')
       t.fail()
@@ -153,7 +153,7 @@ test('getByHash', (t) => {
 
 test('add', (t) => {
   t.test('with non-array', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     try {
       chain.add(123)
       t.fail()
@@ -170,10 +170,10 @@ test('add', (t) => {
   })
 
   t.test('with disconnected first header', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
     try {
-      let headers = mine(chain, 10, false)
+      const headers = mine(chain, 10, false)
       chain.add(headers.slice(1))
       t.fail()
     } catch (err) {
@@ -184,9 +184,9 @@ test('add', (t) => {
 
   // TODO: this rule won't apply when we use highest-work chain instead of longest
   t.test('with shorter fork', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let headers = mine(chain, 10, false)
+    const headers = mine(chain, 10, false)
     mine(chain, 11)
     try {
       chain.add(headers)
@@ -199,12 +199,12 @@ test('add', (t) => {
 
   // TODO: this rule won't apply when we use highest-work chain instead of longest
   t.test('with long reorg', (t) => {
-    let chain = new Blockchain({
+    const chain = new Blockchain({
       start: testGenesis,
       maxTarget: testMaxTarget
     })
     mine(chain, 10)
-    let headers = mine(chain, 2019, false)
+    const headers = mine(chain, 2019, false)
     mine(chain, 2018)
     try {
       chain.add(headers)
@@ -216,7 +216,7 @@ test('add', (t) => {
   })
 
   t.test('with incorrect prevHash', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
 
     let headers = mine(chain, 10, false)
@@ -241,9 +241,9 @@ test('add', (t) => {
   })
 
   t.test('with skipped header', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let headers = mine(chain, 10, false)
+    const headers = mine(chain, 10, false)
     headers.splice(5, 1)
     try {
       chain.add(headers)
@@ -255,9 +255,9 @@ test('add', (t) => {
   })
 
   t.test('with timestamp below median of prev 11', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let headers = mine(chain, 10, false)
+    const headers = mine(chain, 10, false)
     headers[9].timestamp = headers[3].timestamp
     try {
       chain.add(headers)
@@ -269,9 +269,9 @@ test('add', (t) => {
   })
 
   t.test('with timestamp too far ahead of previous', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
+    const chain = new Blockchain({ start: testGenesis })
     mine(chain, 10)
-    let headers = mine(chain, 10, false)
+    const headers = mine(chain, 10, false)
     headers[5].timestamp += 480000
     try {
       chain.add(headers)
@@ -283,8 +283,8 @@ test('add', (t) => {
   })
 
   t.test('with incorrect retarget', (t) => {
-    let chain = new Blockchain({ start: testGenesis, maxTarget: testMaxTarget })
-    let headers = mine(chain, 2016, false)
+    const chain = new Blockchain({ start: testGenesis, maxTarget: testMaxTarget })
+    const headers = mine(chain, 2016, false)
     headers[2015].bits += 1
     try {
       chain.add(headers)
@@ -296,8 +296,8 @@ test('add', (t) => {
   })
 
   t.test('with unexpected difficulty change', (t) => {
-    let chain = new Blockchain({ start: testGenesis, maxTarget: testMaxTarget })
-    let headers = mine(chain, 10, false)
+    const chain = new Blockchain({ start: testGenesis, maxTarget: testMaxTarget })
+    const headers = mine(chain, 10, false)
     headers[5].bits += 1
     try {
       chain.add(headers)
@@ -309,10 +309,10 @@ test('add', (t) => {
   })
 
   t.test('with invalid proof-of-work', (t) => {
-    let chain = new Blockchain({ start: testGenesis })
-    let header = createHeader(testGenesis, null, null, false)
+    const chain = new Blockchain({ start: testGenesis })
+    const header = createHeader(testGenesis, null, null, false)
     try {
-      chain.add([ header ])
+      chain.add([header])
       t.fail()
     } catch (err) {
       t.equals(err.message, 'Hash is above target')
@@ -321,10 +321,10 @@ test('add', (t) => {
   })
 
   t.test('with valid reorg', (t) => {
-    let store = []
-    let chain = new Blockchain({ start: testGenesis, store })
-    let toAdd = mine(chain, 10, false)
-    let toReorg = mine(chain, 2)
+    const store = []
+    const chain = new Blockchain({ start: testGenesis, store })
+    const toAdd = mine(chain, 10, false)
+    const toReorg = mine(chain, 2)
     chain.once('reorg', (e) => {
       t.deepEquals(e, {
         remove: toReorg.reverse(),
@@ -338,14 +338,14 @@ test('add', (t) => {
   })
 
   t.test('with valid reorg with indexing', (t) => {
-    let store = []
-    let chain = new Blockchain({
+    const store = []
+    const chain = new Blockchain({
       store,
       start: testGenesis,
       indexed: true
     })
-    let toAdd = mine(chain, 10, false)
-    let toReorg = mine(chain, 2)
+    const toAdd = mine(chain, 10, false)
+    const toReorg = mine(chain, 2)
     chain.add(toAdd)
     try {
       chain.getByHash(Blockchain.getHash(toReorg[0]))
